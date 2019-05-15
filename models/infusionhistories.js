@@ -2,11 +2,13 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var infusionhistory= new Schema({
-_task:{ type: Schema.ObjectId, ref: 'Task'},
+_station:{ type: Schema.ObjectId, ref: 'Station'},
 date:String,
+bedName:String,
 infusionDate: Date,
 startingTime:String,
-infusedVolume:String,
+infusedVolume:Number,
+totalVolume:Number,
 endingTime:String,
 dripoId:String,
 message:[{status:String,time:String}],

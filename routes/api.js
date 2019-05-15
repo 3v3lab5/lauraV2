@@ -788,7 +788,6 @@ router.post('/admin/bed',[check('stationId')
                 } 
                 else{
                     res.json({success:true,message:'Bed added successfully'});
-                    socket.data.updateBeds(station._id);
               
 
                 }
@@ -1006,7 +1005,9 @@ router.post('/admin/dripo',[check('stationId')
     .exists().withMessage("stationId field is require")
     .not().isEmpty().withMessage("stationName field is empty"),
     check('dripoId').exists().withMessage("dripoId field is require")
-    .not().isEmpty().withMessage("dripoId field is empty")], (req, res ,next) => 
+    .not().isEmpty().withMessage("dripoId field is empty"),
+    check('altName').exists().withMessage("altName field is require")
+    .not().isEmpty().withMessage("altName field is empty")], (req, res ,next) => 
 
 {
     const errors = validationResult(req);
@@ -1023,26 +1024,48 @@ router.post('/admin/dripo',[check('stationId')
 
         }
         else{
-            var dripo = new Dripo();
-            dripo.dripoId = req.body.dripoId;
-            dripo.stationName = station.stationName;
-            dripo.admin = req.decoded.userName;
-            dripo._admin = ObjectId(req.decoded.uid);
-            dripo._station = ObjectId(station._id);
-            dripo.status = 'offline';
-            // saving user to database
-            dripo.save(function(err){
-                if (err) {
-                    return next(err);
-                }
-                else{
+        Dripo.findOne({dripoId:req.body.dripoId}).exec(function (err,dripo1) {
+            if(err){
+                return next(err);
+            }
+            if(dripo1){
+               res.json({success:false,message:'Dripo already exist'});  
+            }
+            else{
 
-                    res.status(201).json({success:true,message:'Dripo added successfully'});
+                Dripo.findOne({altName:req.body.altName,_station:req.body.stationId}).exec(function (err,dripo2) {
+                    if(err){
+                        return next(err);
+                    }
+                    if(dripo2){
+                       res.json({success:false,message:'ALternative name already taken'}); 
+                    }
+                    else{
+                        var dripo = new Dripo();
+                        dripo.dripoId = req.body.dripoId;
+                        dripo.altName = req.body.altName;
+                        dripo.stationName = station.stationName;
+                        dripo.admin = req.decoded.userName;
+                        dripo._admin = ObjectId(req.decoded.uid);
+                        dripo._station = ObjectId(station._id);
+                        dripo.status = 'offline';
+                        // saving user to database
+                        dripo.save(function(err){
+                            if (err) {
+                                return next(err);
+                            }
+                            else{
 
-                }
-            });
+                                res.status(201).json({success:true,message:'Dripo added successfully'});
 
-            
+                            }
+                        });
+
+                    }
+                });
+
+            }
+        })
             
         }
     
@@ -1073,6 +1096,8 @@ router.put('/admin/dripo',[check('stationId')
     .not().isEmpty().withMessage("stationName field is empty"),
     check('dripoId').exists().withMessage("dripoId field is require")
     .not().isEmpty().withMessage("dripoId field is empty"),
+    check('altName').exists().withMessage("altName field is require")
+    .not().isEmpty().withMessage("altName field is empty"),
     check('_id')
     .exists().withMessage("_id field is require")
     .not().isEmpty().withMessage("_id field is empty")], (req, res ,next) => 
@@ -1098,13 +1123,14 @@ router.put('/admin/dripo',[check('stationId')
                else if(!dripo){
                     res.status(404).json({success:false,message:'No dripo found'});
                }
-               else if(dripo.status == 'online'){
+               else if(dripo.status == 'ongoing' || dripo.status == 'alerted' ){
                     res.status(422).json({success:false,message:'Unable to edit online device'});
                }
                else{
                     dripo.stationName=station.stationName;
                     dripo._station = station._id;
                     dripo.dripoId = req.body.dripoId;
+                    dripo.altName = req.body.altName;
                     dripo.save(function (err) {
                         if(err){
                             return next(err);
@@ -1706,30 +1732,107 @@ router.delete('/nurse/task', [query('_id')
    
 });
 
-router.get('/nurse/patienthistory', [query('_id')
+// router.get('/nurse/patienthistory', [query('_id')
+//     .exists().withMessage("_id field is require")
+//     .not().isEmpty().withMessage("_id field is empty")], (req, res ,next) => 
+// {
+//     const errors = validationResult(req);
+//     if (!errors.isEmpty()) {
+//         return res.status(422).json({ errors: errors.array() });
+//     }
+
+//     Patient.findById({_id:req.query._id}).populate({path:'_medication',model:'Medication',populate: {
+//        path: '_infusionhistory',
+//        model: 'Infusionhistory'
+//      }}).exec(function (err,pat) {
+//         if(err){
+//             return next(err);
+//         }
+//         else if(!pat){
+//             return res.status(200).json({success: false, message: 'No history Available'});
+//         }
+//         else{
+//             console.log(JSON.stringify(pat));
+//             res.json({success:true,message:"History retrieved successfully",data:pat});
+//         }
+//     })
+// });
+
+router.get('/nurse/patienthistory',function (req,res) {
+    Infusionhistory.find({_station:req.decoded.stationId}).sort({infusionDate:-1}).exec(function (err,inf) {
+        if(err){
+           return next(err);
+        }
+        if(inf.length ==0){
+            return res.status(200).json({success: false, message: 'No infusion history found'});
+
+        }
+        else{
+           res.json({success:true,message:"History retrieved successfully",data:inf});
+
+        }
+    })
+})
+
+
+router.get('/nurse/dripo', function(req,res){
+    Dripo.find({_station:ObjectId(req.decoded.stationId)}).sort({altName:1}).exec(function(err,dripo) {
+        if(err){
+            console.log(err);
+        }
+        if(dripo.length == 0){
+            res.json({success:false,message:'No dripo device found'});
+
+        }
+        else{
+            res.json({success:true,message:'dripos found',data:dripo});
+
+        }
+    })
+
+
+});
+
+
+router.put('/nurse/blockack',[check('_id')
     .exists().withMessage("_id field is require")
     .not().isEmpty().withMessage("_id field is empty")], (req, res ,next) => 
+
 {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(422).json({ errors: errors.array() });
     }
-
-    Patient.findById({_id:req.query._id}).populate({path:'_medication',model:'Medication',populate: {
-       path: '_infusionhistory',
-       model: 'Infusionhistory'
-     }}).exec(function (err,pat) {
+    Dripo.findOne({_id:ObjectId(req.body._id)}).exec(function(err,dripo) {
         if(err){
-            return next(err);
+            console.log(err);
         }
-        else if(!pat){
-            return res.status(200).json({success: false, message: 'No history Available'});
+        if(dripo.length == 0){
+            res.json({success:false,message:'No dripo device found'});
+
         }
         else{
-            console.log(JSON.stringify(pat));
-            res.json({success:true,message:"History retrieved successfully",data:pat});
+            var date = new Date();
+            var hours = date.getHours();
+            var minutes = date.getMinutes()
+            dripo.status = 'ongoing';
+            dripo.lastMessageMin = minutes;
+            dripo.save(function(err) {
+                if(err){
+                  return next(err);   
+                }
+                else{
+                    res.json({success:true,data:dripo});
+                }
+            });
+
         }
     })
+
+
+
 });
+
+
 
 module.exports=router;

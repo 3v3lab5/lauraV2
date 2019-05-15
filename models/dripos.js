@@ -8,6 +8,10 @@ var Dripo = new Schema({
 		unique:true,
 		required:true
 	},
+	altName:{
+		type:String, 
+		required:true
+	},
 	admin:{
 		type:String,
 		required:true
@@ -24,9 +28,27 @@ var Dripo = new Schema({
 		type: Schema.ObjectId, 
 		ref: 'Station'
 	},
+	//for monitoring
 	status:{
 		type:String
-	}
+	},
+	monitor:{
+		type:Boolean,
+		default:false
+	},
+	time:Number,
+	timeIn12:String,
+	lastMessageMin:Number,
+	rate:Number,
+	bedName:String,
+	topic:String,
+	deviceCharge:Number,
+	totalVolume:Number,
+	timeRemaining:Number,
+	percentage:Number,
+	infusionStatus:String,
+	infusedVolume:{type:Number,default:0},
+	source:String,
 });
 
 module.exports = mongoose.model('Dripo', Dripo);

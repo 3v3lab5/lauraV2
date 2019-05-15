@@ -23,7 +23,8 @@ mongoose.Promise = require('bluebird');
 const cors = require('cors');
 var jwt = require('jsonwebtoken');
 var secret = 'lauraiswolverinesdaughter';
-var io = require('./lib/sockets').listen(server);
+//var io = require('./lib/sockets').listen(server);
+var io = require('./lib/socketsV2').listen(server);
 require('dotenv').config()
 var mlabUrl = process.env.MONGOLAB_URI;
 
