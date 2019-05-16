@@ -1034,7 +1034,7 @@ router.post('/admin/dripo',[check('stationId')
                     if(err){
                         return next(err);
                     }
-                    if(dripo2[].length !=0){
+                    if(dripo2.length !=0){
                        res.json({success:false,message:'ALternative name already taken'}); 
                     }
                     else{
