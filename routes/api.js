@@ -1021,7 +1021,7 @@ router.post('/admin/dripo',[check('stationId')
     // saving user to database
     newDripo.save(function(err){
         if (err) {
-             console.log("error");
+             console.log(err);
             return next(err);
         }
         else{
