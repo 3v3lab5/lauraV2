@@ -5,7 +5,6 @@ var Schema = mongoose.Schema;
 var Dripo = new Schema({
 	dripoId:{
 		type:String, 
-		unique:true,
 		required:true
 	},
 	altName:{
