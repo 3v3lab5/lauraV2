@@ -1050,11 +1050,11 @@ router.post('/admin/dripo',[check('stationId')
                         // saving user to database
                         newDripo.save(function(err){
                             if (err) {
-                                 console.log("error in 4");
+                                 console.log("error");
                                 return next(err);
                             }
                             else{
-
+                                console.log("success");
                                 res.status(201).json({success:true,message:'Dripo added successfully'});
 
                             }
