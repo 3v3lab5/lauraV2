@@ -904,7 +904,6 @@ router.post('/admin/ivset',[check('ivsetModel')
         else{
 
             res.status(201).json({success:true,message:'Ivset added successfully'});
-            socket.data.updateIvsets(req.decoded.userName);
 
         }
     });
@@ -962,7 +961,6 @@ router.put('/admin/ivset',[check('ivsetModel')
                     return next(err);
                 } else {
                     res.json({ success: true, message: 'Ivset details updated'});
-                    socket.data.updateIvsets(req.decoded.userName);
             
                 }
             });
@@ -994,7 +992,6 @@ router.delete('/admin/ivset', [query('_id')
         else{
             //remove all beds and dripos linked to station
             res.json({success:true,message:"Ivset removed successfully"});
-            socket.data.updateIvsets(req.decoded.userName);
         }
     });    
    
@@ -1017,6 +1014,7 @@ router.post('/admin/dripo',[check('stationId')
 
     Station.findOne({_id: req.body.stationId,admin:req.decoded.userName}).exec(function(err,station) {
         if(err){
+            console.log("error in 1");
             return next(err);
         }
         if(!station){
@@ -1026,6 +1024,7 @@ router.post('/admin/dripo',[check('stationId')
         else{
         Dripo.findOne({dripoId:req.body.dripoId}).exec(function (err,dripo1) {
             if(err){
+                console.log("error in 2");
                 return next(err);
             }
             if(dripo1){
@@ -1035,6 +1034,7 @@ router.post('/admin/dripo',[check('stationId')
 
                 Dripo.findOne({altName:req.body.altName,_station:req.body.stationId}).exec(function (err,dripo2) {
                     if(err){
+                        console.log("error in 3");
                         return next(err);
                     }
                     if(dripo2){
@@ -1052,6 +1052,7 @@ router.post('/admin/dripo',[check('stationId')
                         // saving user to database
                         dripo.save(function(err){
                             if (err) {
+                                 console.log("error in 4");
                                 return next(err);
                             }
                             else{

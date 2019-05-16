@@ -53,8 +53,8 @@ app.use(function (err,req,res,next) {
 
 //mongodb configuration
 mongoose.Promise = global.Promise;
-mongoose.connect(mlabUrl, { useNewUrlParser: true },function (err) {
-//mongoose.connect('mongodb://localhost/dblaura',{ useNewUrlParser: true }, function(err) {
+//mongoose.connect(mlabUrl, { useNewUrlParser: true },function (err) {
+mongoose.connect('mongodb://localhost/dblaura',{ useNewUrlParser: true }, function(err) {
 	if(err){
 		console.log("Mongodb connection failed");
 	}
