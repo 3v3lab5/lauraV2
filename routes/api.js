@@ -1014,7 +1014,6 @@ router.post('/admin/dripo',[check('stationId')
 
     Station.findOne({_id: req.body.stationId,admin:req.decoded.userName}).exec(function(err,station) {
         if(err){
-            console.log("error in 1");
             return next(err);
         }
         if(!station){
@@ -1024,7 +1023,6 @@ router.post('/admin/dripo',[check('stationId')
         else{
         Dripo.findOne({dripoId:req.body.dripoId}).exec(function (err,dripo1) {
             if(err){
-                console.log("error in 2");
                 return next(err);
             }
             if(dripo1){
@@ -1034,23 +1032,23 @@ router.post('/admin/dripo',[check('stationId')
 
                 Dripo.findOne({altName:req.body.altName,_station:req.body.stationId}).exec(function (err,dripo2) {
                     if(err){
-                        console.log("error in 3");
                         return next(err);
                     }
                     if(dripo2){
                        res.json({success:false,message:'ALternative name already taken'}); 
                     }
                     else{
-                        var dripo = new Dripo();
-                        dripo.dripoId = req.body.dripoId;
-                        dripo.altName = req.body.altName;
-                        dripo.stationName = station.stationName;
-                        dripo.admin = req.decoded.userName;
-                        dripo._admin = ObjectId(req.decoded.uid);
-                        dripo._station = ObjectId(station._id);
-                        dripo.status = 'offline';
+
+                        var newDripo = new Dripo();
+                        newDripo.dripoId = req.body.dripoId;
+                        newDripo.altName = req.body.altName;
+                        newDripo.stationName = station.stationName;
+                        newDripo.admin = req.decoded.userName;
+                        newDripo._admin = ObjectId(req.decoded.uid);
+                        newDripo._station = ObjectId(station._id);
+                        newDripo.status = 'offline';
                         // saving user to database
-                        dripo.save(function(err){
+                        newDripo.save(function(err){
                             if (err) {
                                  console.log("error in 4");
                                 return next(err);

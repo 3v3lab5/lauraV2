@@ -4,20 +4,16 @@ var Schema = mongoose.Schema;
 
 var Dripo = new Schema({
 	dripoId:{
-		type:String, 
-		required:true
+		type:String
 	},
 	altName:{
-		type:String, 
-		required:true
+		type:String
 	},
 	admin:{
-		type:String,
-		required:true
+		type:String
 	},
 	stationName:{
-		type:String,
-		required:true
+		type:String
 	},
 	_admin:{ 
 		type: Schema.ObjectId, 
