@@ -1012,83 +1012,64 @@ router.post('/admin/dripo',[check('stationId')
         return res.status(422).json({ errors: errors.array() });
     }
 
-    var newDripo = new Dripo();
-    newDripo.dripoId = req.body.dripoId;
-    newDripo.altName = req.body.altName;
-    newDripo.admin = req.decoded.userName;
-    newDripo._admin = ObjectId(req.decoded.uid);
-    newDripo.status = 'offline';
-    // saving user to database
-    newDripo.save(function(err){
-        if (err) {
-             console.log(err);
+    Station.findOne({_id: req.body.stationId,admin:req.decoded.userName}).exec(function(err,station) {
+        if(err){
             return next(err);
         }
-        else{
-            console.log("success");
-            res.status(201).json({success:true,message:'Dripo added successfully'});
+        if(!station){
+            res.status(404).json({success:false,message:'No station found'});
 
         }
-    });
-    // Station.findOne({_id: req.body.stationId,admin:req.decoded.userName}).exec(function(err,station) {
-    //     if(err){
-    //         return next(err);
-    //     }
-    //     if(!station){
-    //         res.status(404).json({success:false,message:'No station found'});
+        else{
+        Dripo.findOne({dripoId:req.body.dripoId}).exec(function (err,dripo1) {
+            if(err){
+                return next(err);
+            }
+            if(dripo1){
+               res.json({success:false,message:'Dripo already exist'});  
+            }
+            else{
 
-    //     }
-    //     else{
-    //     Dripo.findOne({dripoId:req.body.dripoId}).exec(function (err,dripo1) {
-    //         if(err){
-    //             return next(err);
-    //         }
-    //         if(dripo1){
-    //            res.json({success:false,message:'Dripo already exist'});  
-    //         }
-    //         else{
+                Dripo.find({altName:req.body.altName,_station:req.body.stationId}).exec(function (err,dripo2) {
+                    if(err){
+                        return next(err);
+                    }
+                    if(dripo2.length !=0){
+                       res.json({success:false,message:'ALternative name already taken'}); 
+                    }
+                    else{
+                        console.log(station.stationName);
+                        console.log(req.decoded.userName);
+                        console.log(req.decoded.uid);
+                        var newDripo = new Dripo();
+                        newDripo.dripoId = req.body.dripoId;
+                        newDripo.altName = req.body.altName;
+                        newDripo.stationName = station.stationName;
+                        newDripo.admin = req.decoded.userName;
+                        newDripo._admin = ObjectId(req.decoded.uid);
+                        newDripo._station = ObjectId(station._id);
+                        newDripo.status = 'offline';
+                        // saving user to database
+                        newDripo.save(function(err){
+                            if (err) {
+                                return next(err);
+                            }
+                            else{
+                                console.log("success");
+                                res.status(201).json({success:true,message:'Dripo added successfully'});
 
-    //             Dripo.find({altName:req.body.altName,_station:req.body.stationId}).exec(function (err,dripo2) {
-    //                 if(err){
-    //                     return next(err);
-    //                 }
-    //                 if(dripo2.length !=0){
-    //                    res.json({success:false,message:'ALternative name already taken'}); 
-    //                 }
-    //                 else{
-    //                     console.log(station.stationName);
-    //                     console.log(req.decoded.userName);
-    //                     console.log(req.decoded.uid);
-    //                     var newDripo = new Dripo();
-    //                     newDripo.dripoId = req.body.dripoId;
-    //                     newDripo.altName = req.body.altName;
-    //                     newDripo.stationName = station.stationName;
-    //                     newDripo.admin = req.decoded.userName;
-    //                     newDripo._admin = ObjectId(req.decoded.uid);
-    //                     newDripo._station = ObjectId(station._id);
-    //                     newDripo.status = 'offline';
-    //                     // saving user to database
-    //                     newDripo.save(function(err){
-    //                         if (err) {
-    //                              console.log("error");
-    //                             return next(err);
-    //                         }
-    //                         else{
-    //                             console.log("success");
-    //                             res.status(201).json({success:true,message:'Dripo added successfully'});
+                            }
+                        });
+                       
+                    }
+                });
 
-    //                         }
-    //                     });
-                  
-    //                 }
-    //             });
-
-    //         }
-    //     })
+            }
+        })
             
-    //    }
+        }
     
-    //});
+    });
 
 
 });
