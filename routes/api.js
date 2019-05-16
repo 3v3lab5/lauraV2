@@ -1015,10 +1015,8 @@ router.post('/admin/dripo',[check('stationId')
     var newDripo = new Dripo();
     newDripo.dripoId = req.body.dripoId;
     newDripo.altName = req.body.altName;
-    newDripo.stationName = station.stationName;
     newDripo.admin = req.decoded.userName;
     newDripo._admin = ObjectId(req.decoded.uid);
-    newDripo._station = ObjectId(station._id);
     newDripo.status = 'offline';
     // saving user to database
     newDripo.save(function(err){
