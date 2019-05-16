@@ -1030,11 +1030,11 @@ router.post('/admin/dripo',[check('stationId')
             }
             else{
 
-                Dripo.findOne({altName:req.body.altName,_station:req.body.stationId}).exec(function (err,dripo2) {
+                Dripo.find({altName:req.body.altName,_station:req.body.stationId}).exec(function (err,dripo2) {
                     if(err){
                         return next(err);
                     }
-                    if(dripo2){
+                    if(dripo2[].length !=0){
                        res.json({success:false,message:'ALternative name already taken'}); 
                     }
                     else{
