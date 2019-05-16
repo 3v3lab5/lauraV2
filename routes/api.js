@@ -1038,40 +1038,42 @@ router.post('/admin/dripo',[check('stationId')
                        res.json({success:false,message:'ALternative name already taken'}); 
                     }
                     else{
-
-                        // var newDripo = new Dripo();
-                        // newDripo.dripoId = req.body.dripoId;
-                        // newDripo.altName = req.body.altName;
-                        // newDripo.stationName = station.stationName;
-                        // newDripo.admin = req.decoded.userName;
-                        // newDripo._admin = ObjectId(req.decoded.uid);
-                        // newDripo._station = ObjectId(station._id);
-                        // newDripo.status = 'offline';
-                        // // saving user to database
-                        // newDripo.save(function(err){
-                        //     if (err) {
-                        //          console.log("error");
-                        //         return next(err);
-                        //     }
-                        //     else{
-                        //         console.log("success");
-                        //         res.status(201).json({success:true,message:'Dripo added successfully'});
-
-                        //     }
-                        // });
-                        Dripo.collection.update({dripoId:req.body.dripoId},{$set:
-                            {
-                                dripoId:req.body.dripoId,
-                                altName:req.body.altName,
-                                stationName:station.stationName,
-                                admin:req.decoded.userName,
-                                _admin : ObjectId(req.decoded.uid),
-                                _station : ObjectId(station._id),
-                                status : 'offline'
+                        console.log(station.stationName);
+                        console.log(req.decoded.userName);
+                        console.log(req.decoded.uid);
+                        var newDripo = new Dripo();
+                        newDripo.dripoId = req.body.dripoId;
+                        newDripo.altName = req.body.altName;
+                        newDripo.stationName = station.stationName;
+                        newDripo.admin = req.decoded.userName;
+                        newDripo._admin = ObjectId(req.decoded.uid);
+                        newDripo._station = ObjectId(station._id);
+                        newDripo.status = 'offline';
+                        // saving user to database
+                        newDripo.save(function(err){
+                            if (err) {
+                                 console.log("error");
+                                return next(err);
+                            }
+                            else{
+                                console.log("success");
+                                res.status(201).json({success:true,message:'Dripo added successfully'});
 
                             }
-                        },{upsert:true});
-                       res.status(201).json({success:true,message:'Dripo added successfully'});
+                        });
+                       //  Dripo.collection.update({dripoId:req.body.dripoId},{$set:
+                       //      {
+                       //          dripoId:req.body.dripoId,
+                       //          altName:req.body.altName,
+                       //          stationName:station.stationName,
+                       //          admin:req.decoded.userName,
+                       //          _admin : ObjectId(req.decoded.uid),
+                       //          _station : ObjectId(station._id),
+                       //          status : 'offline'
+
+                       //      }
+                       //  },{upsert:true});
+                       // res.status(201).json({success:true,message:'Dripo added successfully'});
                     }
                 });
 
