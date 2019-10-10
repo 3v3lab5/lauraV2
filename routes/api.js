@@ -6,8 +6,10 @@ var ip = require('ip');
 var secret = 'lauraiswolverinesdaughter';
 var ObjectId = require('mongodb').ObjectID;
 var socket = require('../lib/sockets');
-
-
+const nodemailer = require('nodemailer');
+let fromMail = 'dripocare@gmail.com';
+require('dotenv').config()
+var gmailPass = process.env.GMAIL_PASSWORD;
 //sendgrid config
 const sgMail = require('@sendgrid/mail');
  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
@@ -62,17 +64,37 @@ router.post('/register', [check('userName')
   			//link for the mail for activation of account
   			var link="http://"+req.get('host')+"/activate/"+user.tempToken; 
   			var ipaddress = ip.address();
-  			var offlinelink = "http://localhost:4200/activate/"+user.tempToken; 
-  			var onlinelink = "http://dripo.care/activate/"+user.tempToken; 
-  			const msg = {
+  			var offlinelink = "http://localhost:4200/guest/activate/"+user.tempToken; 
+  			var onlinelink = "http://dripo.care/guest/activate/"+user.tempToken; 
+            // auth
+            const transporter = nodemailer.createTransport({
+                service: 'gmail',
+                auth: {
+                user: 'dripocare@gmail.com',
+                pass: gmailPass
+            }
+            });
+
+            // email options
+            let mailOptions = {
+                from: fromMail,
                 to: user.userName,
-                from: 'dripocare@evelabs.co',
                 subject: 'Verification Link For dripo.care',
-                text: '******Email Contains two type links***********',
+                text: '******Email Contains two type links***********',                
                 html: "Hello "+user.userName+",<br> Please Click on the link to verify your email.<br><a href="+onlinelink+">Click here to verify</a><br>Please Click on this link to verify your email if you are registered with our local environement<br><a href="+offlinelink+">Click here to verify</a>" ,
+
             };
-            sgMail.send(msg);
-            res.status(201).json({success:true,message:'A verification mail has been sent to your email'});
+
+            // send email
+            transporter.sendMail(mailOptions, (error, response) => {
+            if (error) {
+                console.log(error);
+                res.status(201).json({success:false,message:'Try another email id'});
+
+            }
+                console.log(response);
+                res.status(201).json({success:true,message:'A verification mail has been sent to your email'});
+            });
         }
     });	
 });
@@ -90,6 +112,7 @@ router.get('/activate', [query('token')
                 return next(err);
             }
             else{
+                console.log(user);
                 var token = req.query.token; // Save the token from URL for verification 
                 // Function to verify the user's token
                 jwt.verify(token, secret, function(err, decoded) {
@@ -110,15 +133,40 @@ router.get('/activate', [query('token')
                                 return next(err);
                             } 
                             else {
-                                const msg = {
+                                // const msg = {
+                                //     to: user.userName,
+                                //     from: 'dripocare@evelabs.co',
+                                //     subject: 'Account activated',
+                                //     text: 'Hello ' + user.userName + ', Your account has been successfully activated!',
+                                //     html: 'Hello<strong> ' + user.userName + '</strong>,<br><br>Your account has been successfully activated!'
+                                // };
+                                // sgMail.send(msg);
+
+                                // auth
+                                const transporter = nodemailer.createTransport({
+                                    service: 'gmail',
+                                    auth: {
+                                        user: 'dripocare@gmail.com',
+                                        pass: gmailPass
+                                    }
+                                });
+
+                                // email options
+                                let mailOptions = {
+                                    from: fromMail,
                                     to: user.userName,
-                                    from: 'dripocare@evelabs.co',
                                     subject: 'Account activated',
-                                    text: 'Hello ' + user.userName + ', Your account has been successfully activated!',
                                     html: 'Hello<strong> ' + user.userName + '</strong>,<br><br>Your account has been successfully activated!'
+
                                 };
-                                sgMail.send(msg);
-                                res.json({ success: true, message: 'Account activated!' }); // Return success message to controller
+
+                                // send email
+                                transporter.sendMail(mailOptions, (error, response) => {
+                                    if (error) {
+                                        res.status(201).json({success:false,message:'Try Login'});
+                                    }
+                                    res.status(201).json({success:true,message:'Account activated'});
+                                });
                             }
                          });
                     }
@@ -203,18 +251,44 @@ router.put('/resend', [check('userName')
                     //link for the mail for activation of account
                     var link="http://"+req.get('host')+"/activate/"+user.tempToken; 
                     var ipaddress = ip.address();
-                    var offlinelink = "http://"+ipaddress+"/activate/"+user.tempToken; 
-                    var onlinelink = "http://dripo.care/activate/"+user.tempToken; 
+                    var offlinelink = "http://"+ipaddress+":4200/guest/activate/"+user.tempToken; 
+                    var onlinelink = "http://dripo.care/guest/activate/"+user.tempToken; 
 
-                    const msg = {
+                    // const msg = {
+                    //     to: user.userName,
+                    //     from: 'dripocare@evelabs.co',
+                    //     subject: 'Verification Link For dripo.care',
+                    //     text: '******Email Contains two type links***********',
+                    //     html: "Hello "+user.userName+",<br> Please Click on the link to verify your email for dripo.care.<br><a href="+onlinelink+">Click here to verify</a><br>Please Click on this link to verify your email if you are registered local server<br><a href="+offlinelink+">Click here to verify</a>" ,
+                    // };
+                    // sgMail.send(msg);
+                    // res.json({ success: true, message: 'Activation link has been sent to ' + user.userName + '!' }); // Return success message to controller
+                     // auth
+                     const transporter = nodemailer.createTransport({
+                        service: 'gmail',
+                        auth: {
+                            user: 'dripocare@gmail.com',
+                            pass: gmailPass
+                        }
+                    });
+
+                    // email options
+                    let mailOptions = {
+                        from: fromMail,
                         to: user.userName,
-                        from: 'dripocare@evelabs.co',
                         subject: 'Verification Link For dripo.care',
-                        text: '******Email Contains two type links***********',
                         html: "Hello "+user.userName+",<br> Please Click on the link to verify your email for dripo.care.<br><a href="+onlinelink+">Click here to verify</a><br>Please Click on this link to verify your email if you are registered local server<br><a href="+offlinelink+">Click here to verify</a>" ,
+
                     };
-                    sgMail.send(msg);
-                    res.json({ success: true, message: 'Activation link has been sent to ' + user.userName + '!' }); // Return success message to controller
+
+                    // send email
+                    transporter.sendMail(mailOptions, (error, response) => {
+                        if (error) {
+                            res.status(201).json({success:false,message:'Try Another email id'});
+                        }
+                        res.status(201).json({success:true,message:'Activation link has been sent to ' + user.userName + '!'});
+                    });
+                    
                 }
             });
 
@@ -255,19 +329,42 @@ router.put('/forgotpassword', [check('userName')
                     //link for the mail for activation of account
                     var link="http://"+req.get('host')+"/resetpassword/"+user.resetToken; 
                     var ipaddress = ip.address();
-                    var offlinelink = "http://localhost:4200/resetpassword/"+user.resetToken;
-                    var onlinelink = "http://dripo.care/resetpassword/"+user.resetToken;;
-                    const msg = {
-                    to: user.userName,
-                    from: 'dripocare@evelabs.co',
-                    subject: 'Verification Link For dripo.care',
-                    text: '******Email Contains two type links***********',
-                    html:  "Hello "+user.userName+",<br> Please Click on the link to reset your dripo.care account password.<br><a href="+onlinelink+">Click here to reset</a><br> Please Click on this link to change local account password<br><a href="+offlinelink+">Click here to reset</a>" 
+                    var offlinelink = "http://localhost:4200/guest/resetpassword/"+user.resetToken;
+                    var onlinelink = "http://dripo.care/guest/resetpassword/"+user.resetToken;;
+                    // const msg = {
+                    // to: user.userName,
+                    // from: 'dripocare@evelabs.co',
+                    // subject: 'Verification Link For dripo.care',
+                    // text: '******Email Contains two type links***********',
+                    // html:  "Hello "+user.userName+",<br> Please Click on the link to reset your dripo.care account password.<br><a href="+onlinelink+">Click here to reset</a><br> Please Click on this link to change local account password<br><a href="+offlinelink+">Click here to reset</a>" 
+                    // // };
                     // };
+                    // sgMail.send(msg);
+                    // res.json({ success: true, message: 'Please check your e-mail for password reset link' }); // Return success message
+                    const transporter = nodemailer.createTransport({
+                        service: 'gmail',
+                        auth: {
+                            user: 'dripocare@gmail.com',
+                            pass: gmailPass
+                        }
+                    });
+
+                    // email options
+                    let mailOptions = {
+                        from: fromMail,
+                        to: user.userName,
+                        subject: 'dripo.care password Reset ',
+                        html:  "Hello "+user.userName+",<br> Please Click on the link to reset your dripo.care account password.<br><a href="+onlinelink+">Click here to reset</a><br> Please Click on this link to change local account password<br><a href="+offlinelink+">Click here to reset</a>" 
+
                     };
-                    sgMail.send(msg);
-                    
-                    res.json({ success: true, message: 'Please check your e-mail for password reset link' }); // Return success message
+
+                    // send email
+                    transporter.sendMail(mailOptions, (error, response) => {
+                        if (error) {
+                            res.status(201).json({success:false,message:'Error sending link'});
+                        }
+                        res.status(201).json({success:true,message:'Please check your e-mail for password reset link'});
+                    });
                 }
             });
         }
@@ -333,15 +430,39 @@ router.post('/resetpassword', [check('userName')
                    return next(err); 
                 } 
                 else {
-                    const msg = {
+                //     const msg = {
+                //     to: user.userName,
+                //     from: 'dripocare@evelabs.co',
+                //     subject: 'Password changed',
+                //     text: 'You have successfully changed your password',
+                //     html : "Hello "+user.userName+",<br>You have successfully reset your password <br>" 
+                // };
+                // sgMail.send(msg);                   
+                // res.json({ success: true, message: 'Your password changed successfully'});
+                const transporter = nodemailer.createTransport({
+                    service: 'gmail',
+                    auth: {
+                        user: 'dripocare@gmail.com',
+                        pass: gmailPass
+                    }
+                });
+
+                // email options
+                let mailOptions = {
+                    from: fromMail,
                     to: user.userName,
-                    from: 'dripocare@evelabs.co',
                     subject: 'Password changed',
-                    text: 'You have successfully changed your password',
                     html : "Hello "+user.userName+",<br>You have successfully reset your password <br>" 
+
                 };
-                sgMail.send(msg);                   
-                res.json({ success: true, message: 'Your password changed successfully'}); 
+
+                // send email
+                transporter.sendMail(mailOptions, (error, response) => {
+                    if (error) {
+                        res.status(201).json({success:false,message:'Error sending email'});
+                    }
+                    res.status(201).json({success:true,message:'Your password changed successfully'});
+                }); 
             }
         });
     });
@@ -376,7 +497,7 @@ router.post('/login', [check('userName')
                 }
                 //if password matches check whether user has an active account
                 else if(!user.active){
-                    res.status(422).json({success:false,message:"Account is not yet activated",expired:true});
+                    res.status(201).json({success:true,message:"Account is not yet activated",expired:true});
                 }
                 else{
                     //successful login and passing a token to the user for login
@@ -577,7 +698,7 @@ router.post('/admin/station',[check('stationName')
                     else{
 
                         res.status(201).json({success:true,message:'Station added'});
-                        socket.data.updateIvsets(req.decoded.userName);
+                        //socket.data.updateIvsets(req.decoded.userName);
 
                     }
                 });
@@ -722,7 +843,7 @@ router.delete('/admin/station', [query('_id')
                                                 }
                                                 else{
                                                     res.json({success:true,message:"station removed successfully"});
-                                                    socket.data.updateIvsets(req.decoded.userName);
+                                                    //socket.data.updateIvsets(req.decoded.userName);
 
                                                 }
                                             });
@@ -838,7 +959,7 @@ router.put('/admin/bed',[check('bedName')
                 return next(err);   
             } else {
                 res.json({ success: true, message: 'Bed name updated'});
-                socket.data.updateBeds(bed._station); 
+                //socket.data.updateBeds(bed._station); 
             }
         });
     });
@@ -872,7 +993,7 @@ router.delete('/admin/bed', [query('_id')
                 }
                 else{
                     res.json({success:true,message:"Bed removed successfully"});
-                    socket.data.updateBeds(bed._station); 
+                    //socket.data.updateBeds(bed._station); 
 
                 }
             });
