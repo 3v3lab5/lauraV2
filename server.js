@@ -10,10 +10,22 @@ ___      ___    __    __   ______    ____
  Website: http://evelabs.co
 
  */
-
+const fs = require('fs');
 const express = require('express');
 var app = require('express')();
-var server = require('http').Server(app);
+// var server = require('https').Server(app);
+var https = require('https');
+var serverKey=fs.readFileSync('server.key');
+var serverCert= fs.readFileSync('server.cert');
+
+var options = {
+	key: serverKey,
+	cert: serverCert
+  };
+
+  var server = https.createServer(options, app);
+
+
 const routes = require('./routes/api');
 var morgan = require('morgan');
 var bodyParser = require('body-parser');
@@ -22,14 +34,10 @@ const mongoose = require('mongoose');
 mongoose.Promise = require('bluebird');
 const cors = require('cors');
 var jwt = require('jsonwebtoken');
-var secret = 'lauraiswolverinesdaughter';
 //var io = require('./lib/sockets').listen(server);
 var io = require('./lib/socketsV2').listen(server);
 require('dotenv').config()
 var mlabUrl = process.env.MONGOLAB_URI;
-
-
-
 //for logging requests
 app.use(morgan('dev'));
 
@@ -54,8 +62,8 @@ app.use(function (err,req,res,next) {
 
 //mongodb configuration
 mongoose.Promise = global.Promise;
-//mongoose.connect(mlabUrl, { useNewUrlParser: true },function (err) {
-mongoose.connect('mongodb://localhost/dblaura',{ useNewUrlParser: true }, function(err) {
+mongoose.connect(mlabUrl, { useNewUrlParser: true },function (err) {
+// mongoose.connect('mongodb://localhost/dblaura',{ useNewUrlParser: true }, function(err) {
 	if(err){
 		console.log("Mongodb connection failed");
 	}
@@ -82,3 +90,4 @@ server.listen(process.env.PORT || 4000, function(){
 });
 
 module.exports = server;
+

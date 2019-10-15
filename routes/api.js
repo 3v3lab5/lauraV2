@@ -3,16 +3,21 @@ const router = express.Router();
 const { check,query , validationResult } = require('express-validator/check');
 var jwt = require('jsonwebtoken');
 var ip = require('ip');
-var secret = 'lauraiswolverinesdaughter';
 var ObjectId = require('mongodb').ObjectID;
 var socket = require('../lib/sockets');
 const nodemailer = require('nodemailer');
-let fromMail = 'dripocare@gmail.com';
-require('dotenv').config()
+const fs = require('fs');
+require('dotenv').config();
+
+//read secrets from .env
 var gmailPass = process.env.GMAIL_PASSWORD;
-//sendgrid config
-const sgMail = require('@sendgrid/mail');
- sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+let fromMail = process.env.GMAIL_ID;
+var secret = process.env.KEY;
+
+//jwt keys
+var privateKey = fs.readFileSync('private.pem');
+var publicKey = fs.readFileSync('public.pem');
+
 //models
 var User = require('../models/users');
 var Station = require('../models/stations');
@@ -88,11 +93,11 @@ router.post('/register', [check('userName')
             // send email
             transporter.sendMail(mailOptions, (error, response) => {
             if (error) {
-                console.log(error);
+                //console.log(error);
                 res.status(201).json({success:false,message:'Try another email id'});
 
             }
-                console.log(response);
+                //console.log(response);
                 res.status(201).json({success:true,message:'A verification mail has been sent to your email'});
             });
         }
@@ -112,7 +117,7 @@ router.get('/activate', [query('token')
                 return next(err);
             }
             else{
-                console.log(user);
+                //console.log(user);
                 var token = req.query.token; // Save the token from URL for verification 
                 // Function to verify the user's token
                 jwt.verify(token, secret, function(err, decoded) {
@@ -251,7 +256,7 @@ router.put('/resend', [check('userName')
                     //link for the mail for activation of account
                     var link="http://"+req.get('host')+"/activate/"+user.tempToken; 
                     var ipaddress = ip.address();
-                    var offlinelink = "http://"+ipaddress+":4200/guest/activate/"+user.tempToken; 
+                    var offlinelink = "http://localhost:4200/guest/activate/"+user.tempToken; 
                     var onlinelink = "http://dripo.care/guest/activate/"+user.tempToken; 
 
                     // const msg = {
@@ -501,7 +506,7 @@ router.post('/login', [check('userName')
                 }
                 else{
                     //successful login and passing a token to the user for login
-                    var token = jwt.sign({userName:user.userName,hospitalName:user.hospitalName,uid:user._id,admin:user.admin,permission:user.permission},secret);
+                    var token = jwt.sign({userName:user.userName,hospitalName:user.hospitalName,uid:user._id,admin:user.admin,permission:user.permission},privateKey, { algorithm: 'RS256'});
                     res.json({success:true,message:"Authentication success",token:token,permission:user.permission});
 
                 }
@@ -516,7 +521,7 @@ router.use(function (req,res,next) {
     if(tokenPart){
         var token = tokenPart.split(' ')[1];
         //verify token
-        jwt.verify(token, secret, function(err, decoded) {
+        jwt.verify(token, publicKey, function(err, decoded) {
             if(err){
                 res.json({success:false,message:"Invalid Token"});
             }
@@ -1159,9 +1164,6 @@ router.post('/admin/dripo',[check('stationId')
                        res.json({success:false,message:'ALternative name already taken'}); 
                     }
                     else{
-                        console.log(station.stationName);
-                        console.log(req.decoded.userName);
-                        console.log(req.decoded.uid);
                         var newDripo = new Dripo();
                         newDripo.dripoId = req.body.dripoId;
                         newDripo.altName = req.body.altName;
@@ -1176,7 +1178,6 @@ router.post('/admin/dripo',[check('stationId')
                                 return next(err);
                             }
                             else{
-                                console.log("success");
                                 res.status(201).json({success:true,message:'Dripo added successfully'});
 
                             }
@@ -1353,7 +1354,7 @@ router.post('/nurse/setstation',[check('stationId')
                 res.json({success:false,message:"Selected Station not found"});
             }
             else{
-                var token = jwt.sign({userName:req.decoded.userName,hospitalName:req.decoded.hospitalName,uid:req.decoded.uid,admin:req.decoded.admin,permission:req.decoded.permission,stationName:station.stationName,stationId:station._id},secret);
+                var token = jwt.sign({userName:req.decoded.userName,hospitalName:req.decoded.hospitalName,uid:req.decoded.uid,admin:req.decoded.admin,permission:req.decoded.permission,stationName:station.stationName,stationId:station._id},privateKey, { algorithm: 'RS256'});
                 res.json({success:true,message:"token updated",token:token});
 
             }
@@ -1899,7 +1900,7 @@ router.get('/nurse/patienthistory',function (req,res) {
 router.get('/nurse/dripo', function(req,res){
     Dripo.find({_station:ObjectId(req.decoded.stationId)}).sort({altName:1}).exec(function(err,dripo) {
         if(err){
-            console.log(err);
+            return next(err);
         }
         if(dripo.length == 0){
             res.json({success:false,message:'No dripo device found'});
@@ -1926,7 +1927,7 @@ router.put('/nurse/blockack',[check('_id')
     }
     Dripo.findOne({_id:ObjectId(req.body._id)}).exec(function(err,dripo) {
         if(err){
-            console.log(err);
+            return next(err);
         }
         if(dripo.length == 0){
             res.json({success:false,message:'No dripo device found'});
