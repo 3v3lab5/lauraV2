@@ -1,5 +1,7 @@
 sendgrid.env
 .env
-.pem
-.key
-.cert
+private.pem
+public.pem
+server.key
+server.cert
+ca.crt
