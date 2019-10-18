@@ -37,7 +37,7 @@ var jwt = require('jsonwebtoken');
 //var io = require('./lib/sockets').listen(server);
 var io = require('./lib/socketsV2').listen(server);
 require('dotenv').config()
-// var mlabUrl = process.env.MONGOLAB_URI; 
+var mlabUrl = process.env.MONGOLAB_URI; 
 const atlasUrl = process.env.MONGODBATLAS_URI;
 //for logging requests
 app.use(morgan('dev'));
