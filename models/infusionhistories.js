@@ -14,6 +14,7 @@ dripoId:String,
 message:[{status:String,time:String}],
 error:[{status:String,time:String}],
 lastError:{status:String,time:String},
+logs:String
 });
 
 
