@@ -1854,39 +1854,41 @@ router.delete('/nurse/task', [query('_id')
    
 });
 
-// router.get('/nurse/patienthistory', [query('_id')
-//     .exists().withMessage("_id field is require")
-//     .not().isEmpty().withMessage("_id field is empty")], (req, res ,next) => 
-// {
-//     const errors = validationResult(req);
-//     if (!errors.isEmpty()) {
-//         return res.status(422).json({ errors: errors.array() });
-//     }
+router.get('/nurse/infusiondetails', [query('_id')
+    .exists().withMessage("infusionhistory _id field is require")
+    .not().isEmpty().withMessage("infusionhistory _id field is empty")], (req, res ,next) => 
+{
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
 
-//     Patient.findById({_id:req.query._id}).populate({path:'_medication',model:'Medication',populate: {
-//        path: '_infusionhistory',
-//        model: 'Infusionhistory'
-//      }}).exec(function (err,pat) {
-//         if(err){
-//             return next(err);
-//         }
-//         else if(!pat){
-//             return res.status(200).json({success: false, message: 'No history Available'});
-//         }
-//         else{
-//             console.log(JSON.stringify(pat));
-//             res.json({success:true,message:"History retrieved successfully",data:pat});
-//         }
-//     })
-// });
+    Infusionhistory.findById({_id:req.query._id}).exec(function (err,inf) {
+        if(err){
+            return next(err);
+        }
+        else if(!inf){
+            return res.status(200).json({success: false, message: 'No history details available'});
+        }
+        else{
+            console.log(JSON.stringify(inf));
+            res.json({success:true,message:"Details retrieved successfully",data:inf});
+        }
+    })
+});
 
 router.get('/nurse/patienthistory',function (req,res) {
-    Infusionhistory.find({_station:req.decoded.stationId}).sort({infusionDate:-1}).exec(function (err,inf) {
+    var dateObj = new Date();
+    var month = dateObj.getUTCMonth() + 1; //months from 1-12
+    var day = dateObj.getUTCDate();
+    var year = dateObj.getUTCFullYear();
+    var newDate = day + "/" + month + "/" + year;
+    Infusionhistory.find({_station:req.decoded.stationId,date:newDate}).sort({infusionDate:-1}).exec(function (err,inf) {
         if(err){
            return next(err);
         }
         if(inf.length ==0){
-            return res.status(200).json({success: false, message: 'No infusion history found'});
+            return res.status(200).json({success: false, message: 'No infusions today'});
 
         }
         else{
@@ -1913,6 +1915,37 @@ router.get('/nurse/dripo', function(req,res){
     })
 
 
+});
+
+
+router.get('/nurse/infusionhistory', [query('date')
+    .exists().withMessage("date field is require")
+    .not().isEmpty().withMessage("date field is empty")], (req, res ,next) => 
+{
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
+    var dateObj=new Date(req.query.date)
+    var month = dateObj.getUTCMonth() + 1; //months from 1-12
+    var day = dateObj.getUTCDate();
+    var year = dateObj.getUTCFullYear();
+    var newDate = day + "/" + month + "/" + year;
+    console.log(newDate);
+
+
+    Infusionhistory.find({_station:req.decoded.stationId,date:newDate}).exec(function (err,inf) {
+        if(err){
+            return next(err);
+        }
+        else if(inf.length==0){
+            return res.status(200).json({success: false, message: 'No infusions details found for '+newDate});
+        }
+        else{
+            console.log(JSON.stringify(inf));
+            res.json({success:true,message:"Details retrieved successfully",data:inf});
+        }
+    })
 });
 
 

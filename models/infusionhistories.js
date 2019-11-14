@@ -12,9 +12,10 @@ totalVolume:Number,
 endingTime:String,
 dripoId:String,
 message:[{status:String,time:String}],
+infusionLogs:[{status:String,rate:Number,infusedVolume:Number,time:String,count:Number}],
+batteryLogs:[{charge:Number,time:String,count:Number}],
 error:[{status:String,time:String}],
 lastError:{status:String,time:String},
-logs:String
 });
 
 
