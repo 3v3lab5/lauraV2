@@ -1871,7 +1871,6 @@ router.get('/nurse/infusiondetails', [query('_id')
             return res.status(200).json({success: false, message: 'No history details available'});
         }
         else{
-            console.log(JSON.stringify(inf));
             res.json({success:true,message:"Details retrieved successfully",data:inf});
         }
     })
@@ -1942,7 +1941,6 @@ router.get('/nurse/infusionhistory', [query('date')
             return res.status(200).json({success: false, message: 'No infusions details found for '+newDate});
         }
         else{
-            console.log(JSON.stringify(inf));
             res.json({success:true,message:"Details retrieved successfully",data:inf});
         }
     })

@@ -44,6 +44,8 @@ var Dripo = new Schema({
 	infusionStatus:String,
 	infusedVolume:{type:Number,default:0},
 	source:String,
+	averageRate:Number,
+	infusionMessageCount:Number,
 });
 
 module.exports = mongoose.model('Dripo', Dripo);
