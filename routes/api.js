@@ -1933,7 +1933,7 @@ router.get('/nurse/infusionhistory', [query('date')
     console.log(newDate);
 
 
-    Infusionhistory.find({_station:req.decoded.stationId,date:newDate}).exec(function (err,inf) {
+    Infusionhistory.find({_station:req.decoded.stationId,date:newDate}).sort({infusionDate:-1}).exec(function (err,inf) {
         if(err){
             return next(err);
         }
