@@ -5,7 +5,7 @@ var infusionhistory= new Schema({
 _station:{ type: Schema.ObjectId, ref: 'Station'},
 date:String,
 bedName:String,
-avaerageRate:Number,
+averageRate:{type:Number,default:0},
 infusionDate: Date,
 startingTime:String,
 infusedVolume:Number,
