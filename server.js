@@ -13,17 +13,19 @@ ___      ___    __    __   ______    ____
 const fs = require('fs');
 const express = require('express');
 var app = require('express')();
-var server = require('http').Server(app);
-// var https = require('https');
-// var serverKey=fs.readFileSync('server.key');
-// var serverCert= fs.readFileSync('server.cert');
 
-// var options = {
-// 	key: serverKey,
-// 	cert: serverCert
-//   };
+//var server = require('http').Server(app);
 
-// var server = https.createServer(options, app);
+var https = require('https');
+var serverKey=fs.readFileSync('server.key');
+var serverCert= fs.readFileSync('server.cert');
+
+var options = {
+	key: serverKey,
+	cert: serverCert
+  };
+
+var server = https.createServer(options, app);
 
 
 const routes = require('./routes/api');
