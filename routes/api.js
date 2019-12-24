@@ -89,10 +89,11 @@ router.post('/register', [check('userName')
                 from: 'dripocare@evelabs.co',
                 subject: 'Verification Link For dripo.care',
                 text: '******Verification link for dripo.care***********',                
-                html: "Hello "+user.userName+",<br> Please Click on the link to verify your email.<br><a href="+onlinelink+"></a>",
+                html: "Hello "+user.userName+",<br> Please Click on the link to verify your email.<br><a href="+onlinelink+">Click here to verify</a>" ,
 
             };
             sgMail.send(msg);
+            res.status(201).json({success:true,message:'A verification mail has been sent to your email'});
               
             /*
             // auth
