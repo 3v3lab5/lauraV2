@@ -34,7 +34,7 @@ const sgMail = require('@sendgrid/mail');
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 const msg = {
   to: 'rahulaunni@evelabs.co',
-  from: 'test@example.com',
+  from: 'dripocare@evelabs.co',
   subject: 'Server Restarted',
   text: 'api.dripo.care restarted',
   html: '<strong>Server Restarted</strong>',
@@ -82,7 +82,19 @@ router.post('/register', [check('userName')
   			var link="http://"+req.get('host')+"/activate/"+user.tempToken; 
   			var ipaddress = ip.address();
   			var offlinelink = "http://localhost:4200/guest/activate/"+user.tempToken; 
-  			var onlinelink = "http://dripo.care/guest/activate/"+user.tempToken; 
+            var onlinelink = "https://dripo.care/guest/activate/"+user.tempToken;
+            
+            const msg = {
+                to: 'rahulaunni@evelabs.co',
+                from: 'dripocare@evelabs.co',
+                subject: 'Verification Link For dripo.care',
+                text: '******Verification link for dripo.care***********',                
+                html: "Hello "+user.userName+",<br> Please Click on the link to verify your email.<br><a href="+onlinelink+"></a>",
+
+            };
+            sgMail.send(msg);
+              
+            /*
             // auth
             const transporter = nodemailer.createTransport({
                 service: 'gmail',
@@ -92,6 +104,7 @@ router.post('/register', [check('userName')
             }
             });
 
+            
             // email options
             let mailOptions = {
                 from: fromMail,
@@ -112,6 +125,7 @@ router.post('/register', [check('userName')
                 //console.log(response);
                 res.status(201).json({success:true,message:'A verification mail has been sent to your email'});
             });
+            */
         }
     });	
 });
