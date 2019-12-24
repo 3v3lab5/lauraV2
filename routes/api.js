@@ -165,16 +165,18 @@ router.get('/activate', [query('token')
                                 return next(err);
                             } 
                             else {
-                                // const msg = {
-                                //     to: user.userName,
-                                //     from: 'dripocare@evelabs.co',
-                                //     subject: 'Account activated',
-                                //     text: 'Hello ' + user.userName + ', Your account has been successfully activated!',
-                                //     html: 'Hello<strong> ' + user.userName + '</strong>,<br><br>Your account has been successfully activated!'
-                                // };
-                                // sgMail.send(msg);
+                                const msg = {
+                                    to: user.userName,
+                                    from: 'dripocare@evelabs.co',
+                                    subject: 'Account activated',
+                                    text: 'Hello ' + user.userName + ', Your account has been successfully activated!',
+                                    html: 'Hello<strong> ' + user.userName + '</strong>,<br><br>Your account has been successfully activated!'
+                                };
+                                sgMail.send(msg);
+                                res.status(201).json({success:true,message:'Account activated'});
 
                                 // auth
+                                /*
                                 const transporter = nodemailer.createTransport({
                                     service: 'gmail',
                                     auth: {
@@ -199,6 +201,7 @@ router.get('/activate', [query('token')
                                     }
                                     res.status(201).json({success:true,message:'Account activated'});
                                 });
+                                */
                             }
                          });
                     }
@@ -284,18 +287,20 @@ router.put('/resend', [check('userName')
                     var link="http://"+req.get('host')+"/activate/"+user.tempToken; 
                     var ipaddress = ip.address();
                     var offlinelink = "http://localhost:4200/guest/activate/"+user.tempToken; 
-                    var onlinelink = "http://dripo.care/guest/activate/"+user.tempToken; 
+                    var onlinelink = "https://dripo.care/guest/activate/"+user.tempToken; 
 
-                    // const msg = {
-                    //     to: user.userName,
-                    //     from: 'dripocare@evelabs.co',
-                    //     subject: 'Verification Link For dripo.care',
-                    //     text: '******Email Contains two type links***********',
-                    //     html: "Hello "+user.userName+",<br> Please Click on the link to verify your email for dripo.care.<br><a href="+onlinelink+">Click here to verify</a><br>Please Click on this link to verify your email if you are registered local server<br><a href="+offlinelink+">Click here to verify</a>" ,
-                    // };
-                    // sgMail.send(msg);
-                    // res.json({ success: true, message: 'Activation link has been sent to ' + user.userName + '!' }); // Return success message to controller
+                    const msg = {
+                        to: user.userName,
+                        from: 'dripocare@evelabs.co',
+                        subject: 'Verification Link For dripo.care',
+                        text: '******Verification link for dripo.care***********',                
+                        html: "Hello "+user.userName+",<br> Please Click on the link to verify your email.<br><a href="+onlinelink+">Click here to verify</a>" ,
+                    };
+                    sgMail.send(msg);
+                    res.json({ success: true, message: 'Activation link has been sent to ' + user.userName + '!' }); // Return success message to controller
                      // auth
+
+                    /*
                      const transporter = nodemailer.createTransport({
                         service: 'gmail',
                         auth: {
@@ -320,6 +325,8 @@ router.put('/resend', [check('userName')
                         }
                         res.status(201).json({success:true,message:'Activation link has been sent to ' + user.userName + '!'});
                     });
+
+                    */
                     
                 }
             });
@@ -362,17 +369,18 @@ router.put('/forgotpassword', [check('userName')
                     var link="http://"+req.get('host')+"/resetpassword/"+user.resetToken; 
                     var ipaddress = ip.address();
                     var offlinelink = "http://localhost:4200/guest/resetpassword/"+user.resetToken;
-                    var onlinelink = "http://dripo.care/guest/resetpassword/"+user.resetToken;;
-                    // const msg = {
-                    // to: user.userName,
-                    // from: 'dripocare@evelabs.co',
-                    // subject: 'Verification Link For dripo.care',
-                    // text: '******Email Contains two type links***********',
-                    // html:  "Hello "+user.userName+",<br> Please Click on the link to reset your dripo.care account password.<br><a href="+onlinelink+">Click here to reset</a><br> Please Click on this link to change local account password<br><a href="+offlinelink+">Click here to reset</a>" 
-                    // // };
-                    // };
-                    // sgMail.send(msg);
-                    // res.json({ success: true, message: 'Please check your e-mail for password reset link' }); // Return success message
+                    var onlinelink = "https://dripo.care/guest/resetpassword/"+user.resetToken;;
+                    const msg = {
+                        to: user.userName,
+                        from: 'dripocare@evelabs.co',
+                        subject: 'Verification Link For dripo.care',
+                        text: '******Email Contains two type links***********',
+                        html:  "Hello "+user.userName+",<br> Please Click on the link to reset your dripo.care account password.<br><a href="+onlinelink+">Click here to reset</a>",
+                    };
+                    sgMail.send(msg);
+                    res.json({ success: true, message: 'Please check your e-mail for password reset link' }); // Return success message
+                    
+                    /*
                     const transporter = nodemailer.createTransport({
                         service: 'gmail',
                         auth: {
@@ -397,6 +405,8 @@ router.put('/forgotpassword', [check('userName')
                         }
                         res.status(201).json({success:true,message:'Please check your e-mail for password reset link'});
                     });
+
+                    */
                 }
             });
         }
@@ -462,15 +472,17 @@ router.post('/resetpassword', [check('userName')
                    return next(err); 
                 } 
                 else {
-                //     const msg = {
-                //     to: user.userName,
-                //     from: 'dripocare@evelabs.co',
-                //     subject: 'Password changed',
-                //     text: 'You have successfully changed your password',
-                //     html : "Hello "+user.userName+",<br>You have successfully reset your password <br>" 
-                // };
-                // sgMail.send(msg);                   
-                // res.json({ success: true, message: 'Your password changed successfully'});
+                const msg = {
+                    to: user.userName,
+                    from: 'dripocare@evelabs.co',
+                    subject: 'Password changed',
+                    text: 'You have successfully changed your password',
+                    html : "Hello "+user.userName+",<br>You have successfully reset your password <br>" 
+                };
+                sgMail.send(msg);                   
+                res.json({ success: true, message: 'Your password changed successfully'});
+                
+                /*
                 const transporter = nodemailer.createTransport({
                     service: 'gmail',
                     auth: {
@@ -495,6 +507,7 @@ router.post('/resetpassword', [check('userName')
                     }
                     res.status(201).json({success:true,message:'Your password changed successfully'});
                 }); 
+                */
             }
         });
     });
