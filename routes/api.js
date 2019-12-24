@@ -30,6 +30,18 @@ var Infusionhistory = require('../models/infusionhistories');
 var Task = require('../models/tasks');
 
 
+const sgMail = require('@sendgrid/mail');
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+const msg = {
+  to: 'rahulaunni@evelabs.co',
+  from: 'test@example.com',
+  subject: 'Server Restarted',
+  text: 'api.dripo.care restarted',
+  html: '<strong>Server Restarted</strong>',
+};
+sgMail.send(msg);
+
+
 router.post('/register', [check('userName')
     .exists().withMessage("userName is required field")
     .not().isEmpty().withMessage("userName field is empty")
