@@ -94,7 +94,7 @@ router.post('/register', [check('userName')
             transporter.sendMail(mailOptions, (error, response) => {
             if (error) {
                 //console.log(error);
-                res.status(201).json({success:false,message:'Try another email id'});
+                res.status(201).json({success:false,message:error});
 
             }
                 //console.log(response);
