@@ -85,7 +85,7 @@ router.post('/register', [check('userName')
             var onlinelink = "https://dripo.care/guest/activate/"+user.tempToken;
             
             const msg = {
-                to: 'rahulaunni@evelabs.co',
+                to: user.userName,
                 from: 'dripocare@evelabs.co',
                 subject: 'Verification Link For dripo.care',
                 text: '******Verification link for dripo.care***********',                
