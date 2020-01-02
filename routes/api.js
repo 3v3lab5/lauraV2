@@ -32,14 +32,14 @@ var Task = require('../models/tasks');
 
 const sgMail = require('@sendgrid/mail');
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-const msg = {
-  to: 'rahulaunni@evelabs.co',
-  from: 'dripocare@evelabs.co',
-  subject: 'Server Restarted',
-  text: 'api.dripo.care restarted',
-  html: '<strong>Server Restarted</strong>',
-};
-sgMail.send(msg);
+// const msg = {
+//   to: 'rahulaunni@evelabs.co',
+//   from: 'dripocare@evelabs.co',
+//   subject: 'Server Restarted',
+//   text: 'api.dripo.care restarted',
+//   html: '<strong>Server Restarted</strong>',
+// };
+// sgMail.send(msg);
 
 
 router.post('/register', [check('userName')
